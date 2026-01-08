@@ -41,7 +41,10 @@ def receive():
 font_win = font.Font(None, 72)
 font_main = font.Font(None, 36)
 # --- ЗОБРАЖЕННЯ ----
-
+img_back = transform.scale(image.load("фон для програмівання.png"), (WIDTH, HEIGHT))
+img_ball = transform.scale(image.load("мяч для програмування.png"), (40, 20))
+img_paddle1 = transform.scale(image.load("ракетка№1 для програмування.png"), (40, 100))
+img_paddle2 = transform.scale(image.load("ракетка№2 для програмування.png"), (40, 100))
 # --- ЗВУКИ ---
 
 # --- ГРА ---

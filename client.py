@@ -41,18 +41,27 @@ def receive():
 font_win = font.Font(None, 72)
 font_main = font.Font(None, 36)
 # --- ЗОБРАЖЕННЯ ----
-img_back = transform.scale(image.load("фон для програмівання.png"), (WIDTH, HEIGHT))
+img_back = transform.scale(image.load("фон для програмування.png"), (WIDTH, HEIGHT))
 img_ball = transform.scale(image.load("мяч для програмування.png"), (40, 20))
 img_paddle1 = transform.scale(image.load("ракетка№1 для програмування.png"), (40, 100))
 img_paddle2 = transform.scale(image.load("ракетка№2 для програмування.png"), (40, 100))
 # --- ЗВУКИ ---
+mixer.music.load("фон.ogg")
+wall_hit_sound = mixer.Sound("удар об стіну.wav")
+platform_hit_sounds = mixer.Sound("мячик об ракетку.wav")
+win_sound = mixer.Sound("виграш.wav")
+lose_sound = mixer.Sound("програш.wav")
 
+mixer.music.set_volume(0.8)
 # --- ГРА ---
 game_over = False
 winner = None
 you_winner = None
 my_id, game_state, buffer, client = connect_to_server()
 Thread(target=receive, daemon=True).start()
+
+mixer.music.play(-1)
+
 while True:
     for e in event.get():
         if e.type == QUIT:
@@ -71,9 +80,10 @@ while True:
         if you_winner is None:  # Встановлюємо тільки один раз
             if game_state["winner"] == my_id:
                 you_winner = True
+                win_sound.play()
             else:
                 you_winner = False
-
+                lose_sound.play()
         if you_winner:
             text = "Ти переміг!"
         else:
@@ -91,20 +101,20 @@ while True:
         continue  # Блокує гру після перемоги
 
     if game_state:
-        screen.fill((30, 30, 30))
-        draw.rect(screen, (0, 255, 0), (20, game_state['paddles']['0'], 20, 100))
-        draw.rect(screen, (255, 0, 255), (WIDTH - 40, game_state['paddles']['1'], 20, 100))
-        draw.circle(screen, (255, 255, 255), (game_state['ball']['x'], game_state['ball']['y']), 10)
+        screen.blit(img_back, (0, 0))
+        screen.blit(img_paddle1, (20, game_state['paddles']['0']))
+        screen.blit(img_paddle2, (WIDTH - 40, game_state['paddles']['1']))
+        screen.blit(img_ball, (game_state['ball']['x'] - 10, game_state['ball']['y'] - 10))
         score_text = font_main.render(f"{game_state['scores'][0]} : {game_state['scores'][1]}", True, (255, 255, 255))
         screen.blit(score_text, (WIDTH // 2 -25, 20))
 
         if game_state['sound_event']:
             if game_state['sound_event'] == 'wall_hit':
                 # звук відбиття м'ячика від стін
-                pass
+                wall_hit_sound.play()
             if game_state['sound_event'] == 'platform_hit':
                 # звук відбиття м'ячика від платформи
-                pass
+                platform_hit_sounds.play()
 
     else:
         wating_text = font_main.render(f"Очікування гравців...", True, (255, 255, 255))
